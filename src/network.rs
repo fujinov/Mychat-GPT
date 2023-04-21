@@ -37,6 +37,35 @@ pub async fn waitting_message() {
 #[cfg(test)]
 mod tests {
     use crate::network::*;
+    use crate::chat::*;
+
+    #[test]
+    fn json_de_test() {
+        let response = r#"
+        {
+            "id": "chatcmpl-123",
+            "object": "chat.completion",
+            "created": 1677652288,
+            "choices": [{
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "\n\nHello there, how may I assist you today?"
+              },
+              "finish_reason": "stop"
+            }],
+            "usage": {
+              "prompt_tokens": 9,
+              "completion_tokens": 12,
+              "total_tokens": 21
+            }
+          }
+          "#;
+          
+        let res:Completion = serde_json::from_str(response).unwrap();
+        assert_eq!("assistant", res.choices[0].message["role"]);
+        assert_eq!(21, res.usage["total_tokens"]);
+    }
 
     // #[tokio::test]
     // async fn request_test() {
@@ -51,7 +80,7 @@ mod tests {
     #[tokio::test]
     async fn print_wait_message() {
         let handle1 = tokio::spawn(async {
-            sleep(tokio::time::Duration::from_secs(5)).await;
+            sleep(Duration::from_secs(5)).await;
         });
         let handle2 = tokio::spawn(waitting_message());
 
