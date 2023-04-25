@@ -1,3 +1,3 @@
+mod chat;
 mod file;
 mod network;
-mod chat;
