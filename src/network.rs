@@ -26,7 +26,7 @@ pub async fn waitting_message() {
         stdout().flush().unwrap();
         sleep(Duration::from_secs(1)).await;
         count += 1;
-        if count >= 30 {
+        if count >= 60 {
             println!();
             break;
         }
@@ -68,10 +68,8 @@ mod tests {
     #[ignore = "take time"]
     #[tokio::test]
     async fn print_wait_message() {
-        let handle1 = tokio::spawn(async {
-            sleep(Duration::from_secs(5)).await;
-        });
-        let handle2 = tokio::spawn(waitting_message());
+        let handle1 = sleep(Duration::from_secs(5));
+        let handle2 = waitting_message();
 
         let result;
         tokio::select! {
@@ -82,7 +80,9 @@ mod tests {
                 result = "NG"
             }
         }
-        println!();
+        print!("\r");
+        print!("{}", " ".repeat(30));
+        print!("\r");
         assert_eq!("OK", result);
     }
 }

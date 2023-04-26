@@ -11,7 +11,7 @@ async fn main() {
     let mut tokens: u32 = 0;
     let mut body = MessageBody::default();
 
-    let timeout = Duration::from_secs(20);
+    let timeout = Duration::from_secs(45);
     let url = "https://api.openai.com/v1/chat/completions";
     let api_key = get_api_key();
     let client = Client::builder().timeout(timeout).build().unwrap();
@@ -35,17 +35,35 @@ async fn main() {
           // }
         body.add_message(Role::User, user);
 
-        let response = client
-            .post(url)
-            .bearer_auth(&api_key)
-            .json(&body)
-            .send()
-            .await;
+        let print_message = waitting_message();
+        let reqest = async {
+            client
+                .post(url)
+                .bearer_auth(&api_key)
+                .json(&body)
+                .send()
+                .await
+        };
+        let response;
+        tokio::select! {
+            _ = print_message => {
+                println!("レスポンス取得エラー");
+                println!("もう一度内容を入力してください。");
+                body.messages.pop();
+                continue;
+            }
+            res = reqest => {
+                print!("\r");
+                print!("{}", " ".repeat(30));
+                print!("\r");
+                response = res;
+            }
+        }
         let res = match response {
             Ok(res) => res.text().await.unwrap(),
             Err(e) => {
                 println!("エラー: {e}");
-                println!("正しく取得できませんでした。もう一度内容を入力してください。");
+                println!("もう一度内容を入力してください。");
                 body.messages.pop();
                 continue;
             }
