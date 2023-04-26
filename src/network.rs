@@ -1,6 +1,13 @@
-use reqwest::ClientBuilder;
 use std::{env, time::Duration};
 use tokio::time::sleep;
+
+pub fn get_api_key() -> String {
+    let api_key = env::var("OPENAI_API_KEY");
+    match api_key {
+        Ok(key) => key,
+        Err(_) => panic!("環境変数「OPENAI_API_KEY」にトークンを設定してください"),
+    }
+}
 
 pub async fn waitting_message() {
     use std::io::{stdout, Write};
@@ -29,11 +36,33 @@ pub async fn waitting_message() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::chat::{MessageBody, Role};
+    use reqwest::Client;
 
     #[test]
-    fn get_token() {
-        let token = env::var("OPENAI_API_KEY");
-        println!("////{}////", token.unwrap());
+    fn check_token() {
+        let token = get_api_key();
+        println!("////{}////", token);
+    }
+
+    #[ignore = "consume tokens"]
+    #[tokio::test]
+    async fn reqest_test() {
+        let mut body = MessageBody::default();
+        body.add_message(Role::User, "こんにちは！".to_string());
+        let timeout = Duration::from_secs(20);
+        let client = Client::builder().timeout(timeout).build().unwrap();
+        let url = "https://api.openai.com/v1/chat/completions";
+        let response = client
+            .post(url)
+            .bearer_auth(get_api_key())
+            .json(&body)
+            .send()
+            .await;
+        match response {
+            Ok(res) => println!("{}", res.text().await.unwrap()),
+            Err(e) => println!("error: {}", e),
+        }
     }
 
     #[ignore = "take time"]

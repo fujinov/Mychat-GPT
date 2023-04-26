@@ -1,3 +1,3 @@
-mod chat;
-mod file;
-mod network;
+pub mod chat;
+pub mod file;
+pub mod network;

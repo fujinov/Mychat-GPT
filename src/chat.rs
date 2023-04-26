@@ -7,16 +7,18 @@ pub struct MessageBody {
 }
 
 impl MessageBody {
-    pub fn new(model: Option<&str>) -> Self {
-        Self {
-            model: String::from(model.unwrap_or("gpt-3.5-turbo")),
-            messages: Vec::new(),
-        }
-    }
-
     pub fn add_message(&mut self, role: Role, content: String) {
         let message = Message { role, content };
         self.messages.push(message);
+    }
+}
+
+impl Default for MessageBody {
+    fn default() -> Self {
+        Self {
+            model: String::from("gpt-3.5-turbo"),
+            messages: Vec::new(),
+        }
     }
 }
 
@@ -48,6 +50,17 @@ pub struct Completion {
     pub usage: Tokens,
 }
 
+impl Completion {
+    pub fn get_total_tokens(&self) -> u32 {
+        self.usage.total
+    }
+
+    pub fn get_content(mut self) -> String {
+        let choice = self.choices.pop().unwrap();
+        choice.message.content
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Choice {
     #[serde(rename = "index")]
@@ -73,7 +86,7 @@ mod tests {
 
     #[test]
     fn add_message_test() {
-        let mut body = MessageBody::new(None);
+        let mut body = MessageBody::default();
         body.add_message(Role::System, "system".to_string());
         body.add_message(Role::User, "user".to_string());
         println!("{:?}", body);
@@ -83,7 +96,7 @@ mod tests {
 
     #[test]
     fn struct_to_json() {
-        let mut body = MessageBody::new(None);
+        let mut body = MessageBody::default();
         body.add_message(Role::System, "system".to_string());
         body.add_message(Role::User, "user".to_string());
         let serialized = serde_json::to_string(&body).unwrap();

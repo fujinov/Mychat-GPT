@@ -21,7 +21,7 @@ pub fn access_xml() -> std::fs::File {
 }
 
 fn access_dir() -> PathBuf {
-    let path = Path::new(&"./chat/");
+    let path = Path::new("./chat/");
     if !path.is_dir() {
         DirBuilder::new().create(path).unwrap();
     }
