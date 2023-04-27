@@ -1,13 +1,14 @@
-use std::io;
 use std::time::Duration;
 
-use mychat_gpt::chat::{Completion, MessageBody, Role};
+use mychat_gpt::chat::*;
 use mychat_gpt::network::{get_api_key, waitting_message};
+use mychat_gpt::{input_line, input_lines};
 
 use reqwest::Client;
 
 #[tokio::main]
 async fn main() {
+    let config = Config { lines: false };
     let mut tokens: u32 = 0;
     let mut body = MessageBody::default();
 
@@ -21,13 +22,11 @@ async fn main() {
     // println!("** s もしくは save で保存して終了 **");
     loop {
         println!("<あなた>");
-        let mut user = String::new();
-        if io::stdin().read_line(&mut user).is_err() {
-            println!("入力が正常に受け取れませんでした");
-            continue;
-        }
-        let end = user.trim_end();
-        if end == "q" || end == "quit" {
+        let user = match config.lines {
+            true => input_lines(),
+            false => input_line(),
+        };
+        if user == "q" || user == "quit" {
             println!("{tokens}");
             break;
         } //else if end == "s" || end == "save" {

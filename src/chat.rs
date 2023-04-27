@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+pub struct Config {
+    pub lines: bool,
+}
+
 #[derive(Debug, Serialize)]
 pub struct MessageBody {
     pub model: String,
