@@ -1,3 +1,4 @@
+use std::io::{stdout, Write};
 use std::{env, time::Duration};
 use tokio::time::sleep;
 
@@ -10,8 +11,6 @@ pub fn get_api_key() -> String {
 }
 
 pub async fn waitting_message() {
-    use std::io::{stdout, Write};
-
     let mut count: u8 = 0;
     let message = "回答を待っています";
     loop {
@@ -36,7 +35,7 @@ pub async fn waitting_message() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::chat::{MessageBody, Role};
+    use crate::chat::{chunk_to_string, MessageBody, Role};
     use reqwest::Client;
 
     #[test]
@@ -49,20 +48,27 @@ mod tests {
     #[tokio::test]
     async fn reqest_test() {
         let mut body = MessageBody::default();
-        body.add_message(Role::User, "こんにちは！".to_string());
-        let timeout = Duration::from_secs(20);
+        body.add_message(Role::User, "Hello!".to_string());
+        let timeout = Duration::from_secs(60);
         let client = Client::builder().timeout(timeout).build().unwrap();
         let url = "https://api.openai.com/v1/chat/completions";
-        let response = client
+        let mut response = client
             .post(url)
             .bearer_auth(get_api_key())
             .json(&body)
             .send()
-            .await;
-        match response {
-            Ok(res) => println!("{}", res.text().await.unwrap()),
-            Err(e) => println!("error: {}", e),
+            .await
+            .unwrap();
+
+        let mut message = String::new();
+        while let Some(chunk) = response.chunk().await.unwrap() {
+            let s = chunk_to_string(&chunk);
+            print!("{s}");
+            stdout().flush().unwrap();
+            message.push_str(&s);
         }
+        println!();
+        println!("Finish: {message}");
     }
 
     #[ignore = "take time"]

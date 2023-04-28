@@ -1,13 +1,16 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 pub struct Config {
     pub lines: bool,
+    pub stream: bool,
 }
 
 #[derive(Debug, Serialize)]
 pub struct MessageBody {
     pub model: String,
     pub messages: Vec<Message>,
+    pub stream: bool,
 }
 
 impl MessageBody {
@@ -22,6 +25,7 @@ impl Default for MessageBody {
         Self {
             model: String::from("gpt-3.5-turbo"),
             messages: Vec::new(),
+            stream: true,
         }
     }
 }
@@ -84,6 +88,51 @@ pub struct Tokens {
     pub total: u32,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct CompletionChunk {
+    #[serde(rename = "id")]
+    _id: String,
+    #[serde(rename = "object")]
+    _object: String,
+    #[serde(rename = "created")]
+    _created: u32,
+    #[serde(rename = "model")]
+    _model: String,
+    pub choices: Vec<ChoiceChunk>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ChoiceChunk {
+    pub delta: HashMap<String, String>,
+    #[serde(rename = "index")]
+    _index: u32,
+    #[serde(rename = "finish_reason")]
+    _finish_reason: Option<String>,
+}
+
+pub fn chunk_to_string(chunk: &[u8]) -> String {
+    let chunks = chunk_to_vector(chunk);
+    let mut message = String::new();
+    for c in chunks {
+        if &c == "[DONE]" {
+            break;
+        }
+        let completion: CompletionChunk = serde_json::from_str(&c).unwrap();
+        let choice = &completion.choices[0];
+        if choice.delta.contains_key("content") {
+            message.push_str(&choice.delta["content"]);
+        }
+    }
+    message
+}
+
+fn chunk_to_vector(chunk: &[u8]) -> Vec<String> {
+    let chunk = std::str::from_utf8(chunk).unwrap().trim_end();
+    let mut chunks: Vec<String> = chunk.split("data: ").map(|x| x.to_string()).collect();
+    chunks.remove(0);
+    chunks
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -134,5 +183,12 @@ mod tests {
         println!("{:?}", res);
         assert_eq!(Role::Assistant, res.choices[0].message.role);
         assert_eq!(21, res.usage.total);
+    }
+
+    #[test]
+    fn json_to_chunk_message() {
+        let chunk =  b"data: {\"id\":\"chatcmpl-7AA\",\"object\":\"chat.completion.chunk\",\"created\":1682,\"model\":\"gpt-3.5-turbo-0301\",\"choices\":[{\"delta\":{\"role\":\"assistant\"},\"index\":0,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-7AA\",\"object\":\"chat.completion.chunk\",\"created\":1682,\"model\":\"gpt-3.5-turbo-0301\",\"choices\":[{\"delta\":{\"content\":\"Hello\"},\"index\":0,\"finish_reason\":null}]}\n\n";
+        let s = chunk_to_string(chunk);
+        println!("{s}");
     }
 }

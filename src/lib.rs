@@ -1,8 +1,10 @@
-use std::io;
-
 pub mod chat;
 pub mod file;
 pub mod network;
+
+use std::io;
+
+use self::chat::MessageBody;
 
 pub fn input_line() -> String {
     let mut line = String::new();
@@ -23,6 +25,12 @@ pub fn input_lines() -> String {
         }
     }
     lines.trim_end().to_owned()
+}
+
+pub fn response_error(body: &mut MessageBody) {
+    println!("レスポンス取得エラー");
+    println!("もう一度内容を入力してください。");
+    body.messages.pop();
 }
 
 #[cfg(test)]
