@@ -1,11 +1,43 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use clap::Parser;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Parser)]
 pub struct Config {
+    /// GPTの"role": "system"を設定
+    pub role: Option<String>,
+
+    /// モデルの指定
+    #[arg(short, long, default_value = "gpt-3.5-turbo")]
+    pub model: String,
+
+    /// 複数行の入力を可能に。入力を確定するには空行を挿入
+    #[arg(short, long)]
     pub lines: bool,
-    pub stream: bool,
+
+    /// ストリーム機能のオフ
+    #[arg(short, long)]
+    pub nostream: bool,
 }
 
+impl Config {
+    pub fn check_model(&self) {
+        let mut models = [
+            "gpt-4",
+            "gpt-4-0314",
+            "gpt-4-32k",
+            "gpt-4-32k-0314",
+            "gpt-3.5-turbo",
+            "gpt-3.5-turbo-0301",
+        ]
+        .into_iter();
+        let find = models.find(|x| x == &self.model);
+        if find.is_none() {
+            panic!("モデル名が間違っています");
+        }
+    }
+}
 #[derive(Debug, Serialize)]
 pub struct MessageBody {
     pub model: String,
@@ -27,6 +59,20 @@ impl Default for MessageBody {
             messages: Vec::new(),
             stream: true,
         }
+    }
+}
+
+impl MessageBody {
+    pub fn new(model: String, role: Option<String>, stream: bool) -> Self {
+        let mut body = Self {
+            model,
+            messages: Vec::new(),
+            stream,
+        };
+        if let Some(content) = role {
+            body.add_message(Role::System, content)
+        }
+        body
     }
 }
 
@@ -136,6 +182,18 @@ fn chunk_to_vector(chunk: &[u8]) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[should_panic]
+    fn check_model_test() {
+        let config = Config {
+            model: String::from("gpt-3-turbo"),
+            role: None,
+            lines: false,
+            nostream: false,
+        };
+        config.check_model();
+    }
 
     #[test]
     fn add_message_test() {

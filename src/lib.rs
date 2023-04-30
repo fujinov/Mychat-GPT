@@ -37,6 +37,7 @@ pub fn response_error(body: &mut MessageBody) {
 mod tests {
     use super::*;
 
+    #[ignore = "requires input"]
     #[test]
     fn read_test() {
         let s = input_lines();

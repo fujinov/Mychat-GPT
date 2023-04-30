@@ -20,7 +20,7 @@ pub async fn waitting_message() {
             2 => "...",
             _ => "   ",
         };
-        print!("\0\r");
+        print!("\r");
         print!("{}{}", message, dot);
         stdout().flush().unwrap();
         sleep(Duration::from_secs(1)).await;

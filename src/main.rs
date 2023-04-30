@@ -5,19 +5,15 @@ use mychat_gpt::chat::*;
 use mychat_gpt::network::{get_api_key, waitting_message};
 use mychat_gpt::{input_line, input_lines, response_error};
 
+use clap::Parser;
 use reqwest::Client;
 
 #[tokio::main]
 async fn main() {
-    let config = Config {
-        lines: false,
-        stream: true,
-    };
+    let config = Config::parse();
+    config.check_model();
+    let mut body = MessageBody::new(config.model, config.role, !config.nostream);
     let mut tokens: u32 = 0;
-    let mut body = MessageBody::default();
-    if config.stream {
-        body.stream = true;
-    }
 
     let timeout = Duration::from_secs(45);
     let url = "https://api.openai.com/v1/chat/completions";
@@ -27,6 +23,7 @@ async fn main() {
     println!("*** チャットをはじめます ***");
     println!("** q もしくは quit で終了 **");
     // println!("** s もしくは save で保存して終了 **");
+    // println!("** r もしくは reset でチャット履歴の消去 **")
     loop {
         println!("<あなた>");
         let user = match config.lines {
@@ -34,7 +31,7 @@ async fn main() {
             false => input_line(),
         };
         if user == "q" || user == "quit" {
-            if !config.stream {
+            if config.nostream {
                 println!("{tokens}");
             }
             break;
@@ -44,7 +41,7 @@ async fn main() {
         body.add_message(Role::User, user);
 
         let mut gpt = String::new();
-        if config.stream {
+        if body.stream {
             let reqest = client
                 .post(url)
                 .bearer_auth(&api_key)
