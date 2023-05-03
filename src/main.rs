@@ -2,6 +2,7 @@ use std::io::{stdout, Write};
 use std::time::Duration;
 
 use mychat_gpt::chat::*;
+use mychat_gpt::file::save_file;
 use mychat_gpt::network::{get_api_key, waitting_message};
 use mychat_gpt::{input_line, input_lines, response_error};
 
@@ -20,10 +21,11 @@ async fn main() {
     let api_key = get_api_key();
     let client = Client::builder().timeout(timeout).build().unwrap();
 
-    println!("*** チャットをはじめます ***");
-    println!("** q もしくは quit で終了 **");
-    // println!("** s もしくは save で保存して終了 **");
-    // println!("** r もしくは reset でチャット履歴の消去 **")
+    println!("***********************************");
+    println!("*      チャットをはじめます       *");
+    println!("*      q または quit で終了       *");
+    println!("*   s または save で保存して終了  *");
+    println!("***********************************");
     loop {
         println!("<あなた>");
         let user = match config.lines {
@@ -32,12 +34,19 @@ async fn main() {
         };
         if user == "q" || user == "quit" {
             if config.nostream {
-                println!("{tokens}");
+                println!("Total: {tokens}tokens");
             }
             break;
-        } //else if end == "s" || end == "save" {
-          //     save_file()
-          // }
+        } else if user == "s" || user == "save" {
+            let state = save_file(&body);
+            match state {
+                Ok(m) | Err(m) => println!("--{m}--"),
+            }
+            if config.nostream {
+                println!("Total {tokens}tokens");
+            }
+            break;
+        }
         body.add_message(Role::User, user);
 
         let mut gpt = String::new();

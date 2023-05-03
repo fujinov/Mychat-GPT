@@ -9,9 +9,10 @@ use self::chat::MessageBody;
 pub fn input_line() -> String {
     let mut line = String::new();
     io::stdin().read_line(&mut line).unwrap();
-    line.trim_end().to_owned()
+    line.trim_end().to_string()
 }
 
+/// 空行（\n）がくるまで入力を受け付け
 pub fn input_lines() -> String {
     let mut lines = String::new();
 
@@ -24,7 +25,7 @@ pub fn input_lines() -> String {
             lines.push_str(&s);
         }
     }
-    lines.trim_end().to_owned()
+    lines.trim_end().to_string()
 }
 
 pub fn response_error(body: &mut MessageBody) {

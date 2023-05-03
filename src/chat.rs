@@ -8,15 +8,16 @@ pub struct Config {
     /// GPTの"role": "system"を設定
     pub role: Option<String>,
 
-    /// モデルの指定
+    /// モデルの指定。指定しない場合デフォルト値を採用
     #[arg(short, long, default_value = "gpt-3.5-turbo")]
     pub model: String,
 
-    /// 複数行の入力を可能に。入力を確定するには空行を挿入
+    /// 複数行の入力を可能に
     #[arg(short, long)]
     pub lines: bool,
 
     /// ストリーム機能のオフ
+    /// オフにすると終了時に使用したトークンを表示
     #[arg(short, long)]
     pub nostream: bool,
 }
@@ -45,13 +46,6 @@ pub struct MessageBody {
     pub stream: bool,
 }
 
-impl MessageBody {
-    pub fn add_message(&mut self, role: Role, content: String) {
-        let message = Message { role, content };
-        self.messages.push(message);
-    }
-}
-
 impl Default for MessageBody {
     fn default() -> Self {
         Self {
@@ -73,6 +67,13 @@ impl MessageBody {
             body.add_message(Role::System, content)
         }
         body
+    }
+}
+
+impl MessageBody {
+    pub fn add_message(&mut self, role: Role, content: String) {
+        let message = Message { role, content };
+        self.messages.push(message);
     }
 }
 
