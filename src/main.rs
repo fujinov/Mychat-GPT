@@ -32,6 +32,14 @@ async fn main() {
             true => input_lines(),
             false => input_line(),
         };
+        let user = match user {
+            Ok(input) => input,
+            Err(e) => {
+                println!("{e}: 失敗しました。もう一度試してください。");
+                continue;
+            }
+        };
+
         if user == "q" || user == "quit" {
             if config.nostream {
                 println!("Total: {tokens}tokens");

@@ -46,18 +46,10 @@ pub fn save_file(body: &MessageBody) -> Result<&str, &str> {
     let mut contents = String::new();
 
     for message in &body.messages[0..2] {
-        if message.role != Role::User {
-            continue;
+        if message.role == Role::User {
+            let title = format!("# {}\n", message.content);
+            contents.push_str(&title);
         }
-        let count = message.content.chars().count();
-        let title = if count >= 25 {
-            let (i, _) = message.content.char_indices().nth(25).unwrap();
-            &message.content[..i]
-        } else {
-            &message.content
-        };
-        let text = format!("# {title}\n");
-        contents.push_str(&text);
     }
 
     for message in &body.messages {

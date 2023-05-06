@@ -6,26 +6,26 @@ use std::io;
 
 use self::chat::MessageBody;
 
-pub fn input_line() -> String {
+pub fn input_line() -> std::io::Result<String> {
     let mut line = String::new();
-    io::stdin().read_line(&mut line).unwrap();
-    line.trim_end().to_string()
+    io::stdin().read_line(&mut line)?;
+    Ok(line.trim_end().to_string())
 }
 
 /// 空行（\n）がくるまで入力を受け付け
-pub fn input_lines() -> String {
+pub fn input_lines() -> std::io::Result<String> {
     let mut lines = String::new();
 
     loop {
         let mut s = String::new();
-        io::stdin().read_line(&mut s).unwrap();
+        io::stdin().read_line(&mut s)?;
         if s == "\n" {
             break;
         } else {
             lines.push_str(&s);
         }
     }
-    lines.trim_end().to_string()
+    Ok(lines.trim_end().to_string())
 }
 
 pub fn response_error(body: &mut MessageBody) {
@@ -42,8 +42,9 @@ mod tests {
     #[test]
     fn read_test() {
         let s = input_lines();
-        if s == "q" || s == "quit" {
-            println!("end");
+        match s {
+            Ok(s) => println!("Ok: {s}"),
+            Err(e) => println!("Err: {e}"),
         }
     }
 }
