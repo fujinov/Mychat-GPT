@@ -1,14 +1,7 @@
 use std::io::{stdout, Write};
-use std::{env, time::Duration};
-use tokio::time::sleep;
+use std::time::Duration;
 
-pub fn get_api_key() -> String {
-    let api_key = env::var("OPENAI_API_KEY");
-    match api_key {
-        Ok(key) => key,
-        Err(_) => panic!("環境変数「OPENAI_API_KEY」にトークンを設定してください"),
-    }
-}
+use tokio::time::sleep;
 
 pub async fn waitting_message() {
     let mut count: u8 = 0;
@@ -36,6 +29,7 @@ pub async fn waitting_message() {
 mod tests {
     use super::*;
     use crate::chat::{chunk_to_string, MessageBody, Role};
+    use crate::file::get_api_key;
     use reqwest::Client;
 
     #[test]
@@ -52,16 +46,24 @@ mod tests {
         let timeout = Duration::from_secs(60);
         let client = Client::builder().timeout(timeout).build().unwrap();
         let url = "https://api.openai.com/v1/chat/completions";
-        let mut response = client
+        let response = client
             .post(url)
             .bearer_auth(get_api_key())
             .json(&body)
             .send()
-            .await
-            .unwrap();
+            .await;
+
+        let mut res = match response {
+            Ok(res) => res,
+            Err(e) => panic!("{e}"),
+        };
+        let status = res.status();
+        if !status.is_success() {
+            panic!("Status: {status}")
+        }
 
         let mut message = String::new();
-        while let Some(chunk) = response.chunk().await.unwrap() {
+        while let Some(chunk) = res.chunk().await.unwrap() {
             let s = chunk_to_string(&chunk);
             print!("{s}");
             stdout().flush().unwrap();

@@ -2,8 +2,8 @@ use std::io::{stdout, Write};
 use std::time::Duration;
 
 use mychat_gpt::chat::*;
-use mychat_gpt::file::save_file;
-use mychat_gpt::network::{get_api_key, waitting_message};
+use mychat_gpt::file::{get_api_key, save_file};
+use mychat_gpt::network::waitting_message;
 use mychat_gpt::{input_line, input_lines, response_error};
 
 use clap::Parser;

@@ -1,10 +1,37 @@
-use std::fs::{DirBuilder, OpenOptions};
-use std::io::Write;
+use std::env;
+use std::fs::{DirBuilder, File, OpenOptions};
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use crate::chat::{MessageBody, Role};
 
 use chrono::Local;
+
+/// トークンを「./config/.apikey」もしくは環境変数「OPENAI_API_KEY」から取得する
+pub fn get_api_key() -> String {
+    let api_key = get_api_from_file();
+    if let Some(key) = api_key {
+        return key;
+    }
+
+    let api_key = env::var("OPENAI_API_KEY");
+    match api_key {
+        Ok(key) => key,
+        Err(_) => panic!("ファイル「./config/.apikey」内にトークンを保存するか、もしくは環境変数「OPENAI_API_KEY」にトークンを設定してください"),
+    }
+}
+
+fn get_api_from_file() -> Option<String> {
+    let path = Path::new("./config/.apikey");
+    if path.is_file() {
+        let mut api_key = String::new();
+        let mut file = File::open(path).unwrap();
+        file.read_to_string(&mut api_key).unwrap();
+        Some(api_key.trim_end().to_string())
+    } else {
+        None
+    }
+}
 
 pub fn save_file(body: &MessageBody) -> Result<&str, &str> {
     let length = body.messages.len();
@@ -86,6 +113,21 @@ fn get_date() -> String {
 mod tests {
     use super::*;
     use crate::chat::*;
+
+    #[test]
+    fn get_api_from_file_test() {
+        let api = get_api_from_file();
+        match api {
+            Some(api) => println!("apikey: {api}"),
+            None => println!("None"),
+        }
+    }
+
+    #[test]
+    fn get_api_key_test() {
+        let api = get_api_key();
+        print!("apikey: {api}");
+    }
 
     #[test]
     fn exist_file() {
