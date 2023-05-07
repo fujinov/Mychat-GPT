@@ -4,7 +4,7 @@ use std::time::Duration;
 use mychat_gpt::chat::*;
 use mychat_gpt::file::{get_api_key, save_file};
 use mychat_gpt::network::waitting_message;
-use mychat_gpt::{input_line, input_lines, response_error};
+use mychat_gpt::{input_line, input_lines, response_error, DEFALT_NAME};
 
 use clap::Parser;
 use reqwest::Client;
@@ -21,13 +21,13 @@ async fn main() {
     let api_key = get_api_key();
     let client = Client::builder().timeout(timeout).build().unwrap();
 
-    println!("***********************************");
-    println!("*      チャットをはじめます       *");
-    println!("*      q または quit で終了       *");
-    println!("*   s または save で保存して終了  *");
-    println!("***********************************");
+    println!("************************************");
+    println!("*         Start chatting           *");
+    println!("*       Exit with q or quit        *");
+    println!("*   Save and Exit with s or save   *");
+    println!("************************************");
     loop {
-        println!("<あなた>");
+        println!("<{DEFALT_NAME}>");
         let user = match config.lines {
             true => input_lines(),
             false => input_line(),
@@ -35,7 +35,7 @@ async fn main() {
         let user = match user {
             Ok(input) => input,
             Err(e) => {
-                println!("{e}: 失敗しました。もう一度試してください。");
+                println!("{e}: Failed. Please try again.");
                 continue;
             }
         };

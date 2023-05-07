@@ -5,19 +5,19 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Parser)]
 pub struct Config {
-    /// GPTの"role": "system"を設定
+    /// Set GPT "role": "system"
     pub role: Option<String>,
 
-    /// モデルの指定。指定しない場合デフォルト値を採用
+    /// Model specification. Default value if not specified.
     #[arg(short, long, default_value = "gpt-3.5-turbo")]
     pub model: String,
 
-    /// 複数行の入力を可能に
+    /// Allows multiple lines of input
     #[arg(short, long)]
     pub lines: bool,
 
-    /// ストリーム機能のオフ
-    /// オフにすると終了時に使用したトークンを表示
+    /// Stream function off.
+    /// When turned off, tokens used are displayed at the end of the session
     #[arg(short, long)]
     pub nostream: bool,
 }
@@ -35,7 +35,7 @@ impl Config {
         .into_iter();
         let find = models.find(|x| x == &self.model);
         if find.is_none() {
-            panic!("モデル名が間違っています");
+            panic!("Model name is incorrect");
         }
     }
 }

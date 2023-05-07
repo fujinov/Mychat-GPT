@@ -6,13 +6,15 @@ use std::io;
 
 use self::chat::MessageBody;
 
+pub const DEFALT_NAME: &str = "You";
+
 pub fn input_line() -> std::io::Result<String> {
     let mut line = String::new();
     io::stdin().read_line(&mut line)?;
     Ok(line.trim_end().to_string())
 }
 
-/// 空行（\n）がくるまで入力を受け付け
+/// Accept input until there is a blank line
 pub fn input_lines() -> std::io::Result<String> {
     let mut lines = String::new();
 
@@ -29,8 +31,8 @@ pub fn input_lines() -> std::io::Result<String> {
 }
 
 pub fn response_error(body: &mut MessageBody) {
-    println!("レスポンス取得エラー");
-    println!("もう一度内容を入力してください。");
+    println!("Response acquisition error");
+    println!("Please enter the content again");
     body.messages.pop();
 }
 

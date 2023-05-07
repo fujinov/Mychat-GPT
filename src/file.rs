@@ -4,10 +4,11 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use crate::chat::{MessageBody, Role};
+use crate::DEFALT_NAME;
 
 use chrono::Local;
 
-/// トークンを「./config/.apikey」もしくは環境変数「OPENAI_API_KEY」から取得する
+/// Get the API key from ". /config/.apikey" or the environment variable "OPENAI_API_KEY"
 pub fn get_api_key() -> String {
     let api_key = get_api_from_file();
     if let Some(key) = api_key {
@@ -17,7 +18,9 @@ pub fn get_api_key() -> String {
     let api_key = env::var("OPENAI_API_KEY");
     match api_key {
         Ok(key) => key,
-        Err(_) => panic!("ファイル「./config/.apikey」内にトークンを保存するか、もしくは環境変数「OPENAI_API_KEY」にトークンを設定してください"),
+        Err(_) => panic!(
+            "Save the API key in the file \". /config/.apikey\" or set the API key in the environment variable \"OPENAI_API_KEY\""
+        ),
     }
 }
 
@@ -36,10 +39,10 @@ fn get_api_from_file() -> Option<String> {
 pub fn save_file(body: &MessageBody) -> Result<&str, &str> {
     let length = body.messages.len();
     if length < 2 {
-        return Err("保存するログがありません");
+        return Err("There is no log to save");
     }
     if length == 2 && body.messages[0].role == Role::System {
-        return Err("保存するログがありません");
+        return Err("There is no log to save");
     }
 
     let mut file = access_file();
@@ -54,9 +57,9 @@ pub fn save_file(body: &MessageBody) -> Result<&str, &str> {
 
     for message in &body.messages {
         let role = match message.role {
-            Role::System => "システム設定",
+            Role::System => "GPT's Role",
             Role::Assistant => "ChatGPT",
-            Role::User => "あなた",
+            Role::User => DEFALT_NAME,
         };
         let text = format!("## {role}\n");
         contents.push_str(&text);
@@ -66,8 +69,8 @@ pub fn save_file(body: &MessageBody) -> Result<&str, &str> {
     }
     contents.push('\n');
     file.write_all(contents.as_bytes())
-        .expect("ログの保存に失敗しました");
-    Ok("ログを保存しました")
+        .expect("Failed to save log");
+    Ok("Log saved")
 }
 
 fn access_file() -> std::fs::File {
