@@ -4,7 +4,7 @@ use std::time::Duration;
 use mychat_gpt::chat::*;
 use mychat_gpt::file::{get_api_key, save_file};
 use mychat_gpt::network::waitting_message;
-use mychat_gpt::{input_line, input_lines, response_error, DEFALT_NAME};
+use mychat_gpt::{input_line, input_lines, print_manual, response_error, DEFALT_NAME};
 
 use clap::Parser;
 use reqwest::Client;
@@ -21,11 +21,7 @@ async fn main() {
     let api_key = get_api_key();
     let client = Client::builder().timeout(timeout).build().unwrap();
 
-    println!("************************************");
-    println!("*         Start chatting           *");
-    println!("*       Exit with q or quit        *");
-    println!("*   Save and Exit with s or save   *");
-    println!("************************************");
+    print_manual();
     loop {
         println!("<{DEFALT_NAME}>");
         let user = match config.lines {
@@ -40,12 +36,19 @@ async fn main() {
             }
         };
 
-        if user == "q" || user == "quit" {
+        if user.is_empty() || user == ":q" {
             if config.nostream {
                 println!("Total: {tokens}tokens");
             }
             break;
-        } else if user == "s" || user == "save" {
+        } else if user == ":r" {
+            body.reset_messages();
+            if config.nostream {
+                println!("Total: {tokens}tokens");
+                tokens = 0;
+            }
+            continue;
+        } else if user == ":sq" {
             let state = save_file(&body);
             match state {
                 Ok(m) | Err(m) => println!("--{m}--"),
@@ -54,6 +57,17 @@ async fn main() {
                 println!("Total {tokens}tokens");
             }
             break;
+        } else if user == ":sr" {
+            let state = save_file(&body);
+            match state {
+                Ok(m) | Err(m) => println!("--{m}--"),
+            }
+            body.reset_messages();
+            if config.nostream {
+                println!("Total {tokens}tokens");
+                tokens = 0;
+            }
+            continue;
         }
         body.add_message(Role::User, user);
 

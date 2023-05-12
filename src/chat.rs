@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, vec};
 
 use clap::Parser;
 use serde::{Deserialize, Serialize};
@@ -74,6 +74,20 @@ impl MessageBody {
     pub fn add_message(&mut self, role: Role, content: String) {
         let message = Message { role, content };
         self.messages.push(message);
+    }
+
+    /// except "role": "sysytem"
+    pub fn reset_messages(&mut self) {
+        if self.messages.is_empty() {
+            println!("--Messages is Empty--");
+        } else if self.messages[0].role == Role::System {
+            let front = self.messages.swap_remove(0);
+            self.messages = vec![front];
+            println!("--Messages reset--");
+        } else {
+            self.messages.clear();
+            println!("--Messages reset--");
+        }
     }
 }
 
@@ -204,6 +218,22 @@ mod tests {
         println!("{:?}", body);
         assert_eq!(Role::System, body.messages[0].role);
         assert_eq!("user".to_string(), body.messages[1].content);
+    }
+
+    #[test]
+    fn reset_messages_test() {
+        let mut body = MessageBody::default();
+        body.add_message(Role::User, "user".to_string());
+        body.reset_messages();
+        println!("{:?}", body);
+        assert!(body.messages.is_empty());
+
+        body.add_message(Role::System, "system".to_string());
+        body.add_message(Role::User, "user".to_string());
+        body.add_message(Role::Assistant, "assistant".to_string());
+        body.reset_messages();
+        println!("{:?}", body);
+        assert_eq!("system".to_string(), body.messages[0].content);
     }
 
     #[test]

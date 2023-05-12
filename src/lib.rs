@@ -8,6 +8,16 @@ use self::chat::MessageBody;
 
 pub const DEFALT_NAME: &str = "You";
 
+pub fn print_manual() {
+    println!("{}", "*".repeat(40));
+    println!("*{0: ^38}*", "Start chatting");
+    println!("*{0: ^38}*", "Quit with a blank line or \":q\"");
+    println!("*{0: ^38}*", "Reset messages with \":r\"");
+    println!("*{0: ^38}*", "Save and Quit with \":sq\"");
+    println!("*{0: ^38}*", "Save and Reset with \":sr\"");
+    println!("{}", "*".repeat(40));
+}
+
 pub fn input_line() -> std::io::Result<String> {
     let mut line = String::new();
     io::stdin().read_line(&mut line)?;
@@ -39,6 +49,11 @@ pub fn response_error(body: &mut MessageBody) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn print_manual_test() {
+        print_manual();
+    }
 
     #[ignore = "requires input"]
     #[test]

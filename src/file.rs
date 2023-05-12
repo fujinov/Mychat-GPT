@@ -41,9 +41,6 @@ pub fn save_file(body: &MessageBody) -> Result<&str, &str> {
     if length < 2 {
         return Err("There is no log to save");
     }
-    if length == 2 && body.messages[0].role == Role::System {
-        return Err("There is no log to save");
-    }
 
     let mut file = access_file();
     let mut contents = String::new();
