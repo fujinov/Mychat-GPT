@@ -1,4 +1,3 @@
 target/
 chat/
-config/.apikey
-examples
+.apikey

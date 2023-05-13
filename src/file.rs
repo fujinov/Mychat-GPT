@@ -8,7 +8,7 @@ use crate::DEFALT_NAME;
 
 use chrono::Local;
 
-/// Get the API key from ". /config/.apikey" or the environment variable "OPENAI_API_KEY"
+/// Get the API key from "./.apikey" or the environment variable "OPENAI_API_KEY"
 pub fn get_api_key() -> String {
     let api_key = get_api_from_file();
     if let Some(key) = api_key {
@@ -19,13 +19,13 @@ pub fn get_api_key() -> String {
     match api_key {
         Ok(key) => key,
         Err(_) => panic!(
-            "Save the API key in the file \". /config/.apikey\" or set the API key in the environment variable \"OPENAI_API_KEY\""
+            "Save the API key in the file \"./.apikey\" or set the API key in the environment variable \"OPENAI_API_KEY\""
         ),
     }
 }
 
 fn get_api_from_file() -> Option<String> {
-    let path = Path::new("./config/.apikey");
+    let path = Path::new("./.apikey");
     if path.is_file() {
         let mut api_key = String::new();
         let mut file = File::open(path).unwrap();
@@ -118,7 +118,7 @@ mod tests {
     #[test]
     fn get_api_key_test() {
         let api = get_api_key();
-        print!("apikey: {api}");
+        println!("apikey: {api}");
     }
 
     #[test]
