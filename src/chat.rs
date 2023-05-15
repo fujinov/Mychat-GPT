@@ -12,7 +12,8 @@ pub struct Config {
     #[arg(short, long, default_value = "gpt-3.5-turbo")]
     pub model: String,
 
-    /// Allows multiple lines of input
+    /// Accept input until EOF comes in.
+    /// To insert EOF, "Ctrl+z" for Windows, "Ctrl+d" for Unix systems
     #[arg(short, long)]
     pub lines: bool,
 

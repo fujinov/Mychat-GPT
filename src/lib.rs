@@ -2,7 +2,7 @@ pub mod chat;
 pub mod file;
 pub mod network;
 
-use std::io;
+use std::io::{self, Read};
 
 use self::chat::MessageBody;
 
@@ -24,19 +24,11 @@ pub fn input_line() -> std::io::Result<String> {
     Ok(line.trim_end().to_string())
 }
 
-/// Accept input until there is a blank line
+/// Accept input until EOF comes in.
+/// To insert EOF, "Ctrl+z" for Windows, "Ctrl+d" for Unix systems
 pub fn input_lines() -> std::io::Result<String> {
     let mut lines = String::new();
-
-    loop {
-        let mut s = String::new();
-        io::stdin().read_line(&mut s)?;
-        if s == "\n" {
-            break;
-        } else {
-            lines.push_str(&s);
-        }
-    }
+    io::stdin().read_to_string(&mut lines)?;
     Ok(lines.trim_end().to_string())
 }
 
