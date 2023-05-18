@@ -86,6 +86,13 @@ async fn main() {
                     continue;
                 }
             };
+            let status = response.status();
+            if !status.is_success() {
+                println!("--Status: {status}--");
+                response_error(&mut body);
+                continue;
+            }
+
             println!("<ChatGPT>");
             while let Some(chunk) = response.chunk().await.unwrap() {
                 let s = chunk_to_string(&chunk);
@@ -117,12 +124,19 @@ async fn main() {
                     response = res;
                 }
             }
-            let res = match response {
-                Ok(res) => res.text().await.unwrap(),
-                Err(_) => {
+            let res = if response.is_ok() {
+                let response = response.unwrap();
+                let status = response.status();
+                if status.is_success() {
+                    response.text().await.unwrap()
+                } else {
+                    println!("--Status: {status}--");
                     response_error(&mut body);
                     continue;
                 }
+            } else {
+                response_error(&mut body);
+                continue;
             };
 
             let chat_completion: Completion = serde_json::from_str(&res).unwrap();

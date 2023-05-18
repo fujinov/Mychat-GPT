@@ -5,7 +5,7 @@ use tokio::time::sleep;
 
 pub async fn waitting_message() {
     let mut count: u8 = 0;
-    let message = "Waiting for your response";
+    let message = "Waiting for a response";
     loop {
         let dot = match count % 3 {
             0 => ".  ",
