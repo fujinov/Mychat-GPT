@@ -1,8 +1,9 @@
 # Mychat-GPT
-![mychat-gpt Demo](https://github.com/fujinov/Mychat-GPT/assets/98008144/5c3073a3-ac14-4463-990c-766d81048d7b)
 
 ## 概要
-コマンドラインで使用するChatGPT
+コマンドラインで使用するChatGPT<br>
+![mychat-gpt Demo](https://github.com/fujinov/Mychat-GPT/assets/98008144/5c3073a3-ac14-4463-990c-766d81048d7b)
+
 
 ## 特徴
 - ストリーム表示と一括表示の切り替え
@@ -41,16 +42,16 @@
 ヘルプの表示
 
 ### 入力時
-チャットの終了
-**:q　もしくは　空行を挿入**<br>
+チャットの終了<br>
+**:q　もしくは　空行を挿入**
 
-メッセージのリセット（"role": "system"はそのまま）
-**:r**<br>
+メッセージのリセット（"role": "system"はそのまま）<br>
+**:r**
 
-チャットを保存して終了
-**:sq**<br>
+チャットを保存して終了<br>
+**:sq**
 
-チャットの保存とメッセージのリセット
-**:sr**<br>
+チャットの保存とメッセージのリセット<br>
+**:sr**
 
 ※チャットのログは「./chat/年月日」に。
